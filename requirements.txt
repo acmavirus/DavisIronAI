@@ -1,0 +1,5 @@
+google-generativeai
+python-telegram-bot
+pyautogui
+pillow
+python-dotenv
