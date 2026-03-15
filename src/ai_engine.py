@@ -2,8 +2,9 @@ import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 from .actions import (
-    open_app, open_directory, take_screenshot, 
-    open_link, list_running_apps, kill_application
+    open_app_with_folder, open_directory, take_screenshot, 
+    open_link, list_running_apps, kill_application, get_directory_status,
+    save_memory, get_memory, list_memories
 )
 
 load_dotenv()
@@ -18,20 +19,28 @@ class AIEngine:
         
         # Danh sách tools để AI có thể gọi
         self.tools = [
-            open_app, open_directory, take_screenshot, 
-            open_link, list_running_apps, kill_application
+            open_app_with_folder, open_directory, take_screenshot, 
+            open_link, list_running_apps, kill_application, get_directory_status,
+            save_memory, get_memory, list_memories
         ]
         
+        # Lấy tên chủ nhân từ bộ nhớ, mặc định là 'bạn' nếu không có
+        from .memory_manager import memory
+        user_name = memory.get_raw("current_user_name", "bạn")
+
         self.model = genai.GenerativeModel(
             model_name='gemini-3-flash-preview',
             tools=self.tools,
             system_instruction=(
-                "Bạn là Davis Iron, trợ lý AI thông minh trên Desktop của chủ nhân. "
-                "Bạn có quyền điều khiển máy tính thông qua các công cụ được cung cấp. "
-                "Hãy phản hồi lịch sự, ngắn gọn và thực thi lệnh ngay khi được yêu cầu. "
-                "Nếu không chắc chắn về đường dẫn, hãy hỏi lại chủ nhân."
+                f"Bạn là Davis Iron AI, trợ lý đắc lực của {user_name}. "
+                "\nBỘ NHỚ LÂU DÀI: Bạn có khả năng lưu trữ thông tin (save_memory) và truy xuất lại sau (get_memory). "
+                f"Nếu {user_name} nhắc về các dự án hoặc đường dẫn thư mục, hãy dùng get_memory để kiểm tra xem bạn đã lưu chúng chưa. "
+                "Nếu chưa lưu, hãy hỏi họ hoặc tự động lưu lại (save_memory) sau khi họ cung cấp thông tin. "
+                "\nBạn có quyền điều khiển máy tính thông qua các công cụ được cung cấp. "
+                "Hãy phản hồi lịch sự, ngắn gọn và thực thi lệnh ngay khi được yêu cầu."
             )
         )
+
         self.chat = self.model.start_chat(enable_automatic_function_calling=True)
 
     def process_message(self, user_input: str):

@@ -4,6 +4,8 @@ import webbrowser
 import pyautogui
 import psutil
 from pathlib import Path
+from datetime import datetime
+from .memory_manager import memory
 
 def list_running_apps() -> str:
     """
@@ -45,18 +47,31 @@ def kill_application(app_name: str) -> str:
     except Exception as e:
         return f"❌ Lỗi khi tắt ứng dụng: {str(e)}"
 
-def open_app(app_name: str) -> str:
+def open_app_with_folder(app_name: str, folder_path: str = None) -> str:
     """
-    Opens a specific application on Windows.
+    Mở một ứng dụng cụ thể và có thể kèm theo một thư mục hoặc tệp tin.
     Args:
-        app_name: The name of the application (e.g., 'notepad', 'chrome', 'calc').
+        app_name: Tên ứng dụng (ví dụ: 'Code', 'Notepad')
+        folder_path: Đường dẫn đầy đủ đến thư mục hoặc tệp tin cần mở (ví dụ: 'C:\\Users\\Path\\To\\Project')
     """
     try:
-        # On Windows, 'start' can launch many apps/files
+        if folder_path:
+            # Kiểm tra nếu đường dẫn tồn tại trước khi mở
+            if os.path.exists(folder_path):
+                # Sử dụng command line để mở app với path
+                # Một số app cần truyền path như đối số, một số khác dùng start "app" "path"
+                subprocess.Popen([app_name, folder_path], shell=True)
+                return f"✅ Đã mở {app_name} với dự án tại {folder_path}"
+            else:
+                # Nếu path không tồn tại, chỉ mở app
+                subprocess.Popen(f"start {app_name}", shell=True)
+                return f"⚠️ Thư mục {folder_path} không tồn tại, nhưng tôi đã mở {app_name} cho bạn."
+        
         subprocess.Popen(f"start {app_name}", shell=True)
-        return f"✅ Đã thực hiện lệnh mở: {app_name}"
+        return f"✅ Đã mở {app_name}"
     except Exception as e:
-        return f"❌ Lỗi khi mở ứng dụng: {str(e)}"
+        return f"❌ Lỗi: {str(e)}"
+
 
 def open_directory(path_name: str) -> str:
     """
@@ -113,3 +128,60 @@ def open_link(url: str) -> str:
         return f"🌐 Đã mở trình duyệt tại: {url}"
     except Exception as e:
         return f"❌ Lỗi trình duyệt: {str(e)}"
+
+def get_directory_status(directory_path: str) -> str:
+    """
+    Thống kê sơ bộ về thư mục (số lượng file, ngày cập nhật gần nhất).
+    Args:
+        directory_path: Đường dẫn đến thư mục cần thống kê.
+    """
+    try:
+        path = Path(directory_path)
+        if not path.exists():
+            return f"❌ Thư mục {directory_path} không tồn tại."
+        
+        # Quét tất cả file (loại trừ các thư mục ẩn và vendor/node_modules để nhanh hơn)
+        files = []
+        for f in path.rglob('*'):
+            if f.is_file() and not any(part.startswith('.') or part in ['vendor', 'node_modules'] for part in f.parts):
+                files.append(f)
+        
+        file_count = len(files)
+        
+        if files:
+            latest_file = max(files, key=lambda f: f.stat().st_mtime)
+            mtime = datetime.fromtimestamp(latest_file.stat().st_mtime).strftime('%d/%m/%Y %H:%M:%S')
+            return (
+                f"📊 **Báo cáo tiến độ cho {path.name}:**\n"
+                f"- Tổng số file code: {file_count}\n"
+                f"- File cập nhật cuối: `{latest_file.name}`\n"
+                f"- Thời gian: {mtime}\n"
+                f"Davis thấy bạn đang làm rất tốt! 🚀"
+            )
+        
+        return f"📊 Thư mục {path.name} hiện đang trống."
+    except Exception as e:
+        return f"❌ Lỗi thống kê: {str(e)}"
+
+def save_memory(key: str, value: str) -> str:
+    """
+    Lưu trữ một thông tin quan trọng vào bộ nhớ lâu dài.
+    Args:
+        key: Tên thông tin (ví dụ: 'sinh nhật của Nam', 'project_status')
+        value: Nội dung cần nhớ.
+    """
+    return memory.store(key, value)
+
+def get_memory(key: str) -> str:
+    """
+    Lấy lại thông tin đã lưu từ bộ nhớ.
+    Args:
+        key: Tên thông tin cần tìm.
+    """
+    return memory.retrieve(key)
+
+def list_memories() -> str:
+    """
+    Liệt kê tất cả các thông tin đang có trong bộ nhớ.
+    """
+    return memory.list_all()
