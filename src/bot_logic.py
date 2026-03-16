@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 
 class DavisBot:
-    def __init__(self):
+    def __init__(self, version: str):
         token = os.getenv("TELEGRAM_BOT_TOKEN")
         self.whitelist_id = os.getenv("WHITELIST_USER_ID")
         
@@ -25,9 +25,8 @@ class DavisBot:
         self.ai = AIEngine()
         self.app = Application.builder().token(token).build()
         
-        # Phiên bản từ main (giả định được truyền vào hoặc import)
-        from .main import VERSION
-        self.updater = AutoUpdater(VERSION)
+        # Phiên bản được truyền từ main
+        self.updater = AutoUpdater(version)
         self.update_available = False
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

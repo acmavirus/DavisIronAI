@@ -3,6 +3,7 @@ import os
 import sys
 import subprocess
 import time
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()

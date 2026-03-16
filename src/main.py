@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Thêm thư mục gốc vào PYTHONPATH để import các module trong src/
@@ -28,7 +30,7 @@ def main():
     cleanup_temp()
     
     try:
-        bot = DavisBot()
+        bot = DavisBot(VERSION)
         bot.run()
     except Exception as e:
         print(f"💥 Lỗi nghiêm trọng khi khởi động: {e}")
