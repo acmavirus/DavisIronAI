@@ -3,6 +3,7 @@ import logging
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from .ai_engine import AIEngine
+from .updater import AutoUpdater
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,6 +24,11 @@ class DavisBot:
             
         self.ai = AIEngine()
         self.app = Application.builder().token(token).build()
+        
+        # Phiên bản từ main (giả định được truyền vào hoặc import)
+        from .main import VERSION
+        self.updater = AutoUpdater(VERSION)
+        self.update_available = False
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
@@ -49,6 +55,15 @@ class DavisBot:
         if not user_text:
             return
 
+        # Kiểm tra lệnh update đặc biệt
+        if user_text.lower() == "/update" and user_id == int(self.whitelist_id):
+            if self.updater.check_for_updates():
+                await update.message.reply_text(f"🔄 Đang bắt đầu cập nhật lên bản v{self.updater.latest_version}...")
+                self.updater.download_and_install()
+            else:
+                await update.message.reply_text("✅ Bạn đang sử dụng phiên bản mới nhất.")
+            return
+
         # Gửi thông báo đang xử lý
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
 
@@ -67,7 +82,18 @@ class DavisBot:
 
         await update.message.reply_text(reply)
 
+    async def post_init(self, application: Application):
+        """Kiểm tra update ngay khi bot online"""
+        if self.updater.check_for_updates():
+            self.update_available = True
+            msg = f"✨ **Đã có bản cập nhật mới (v{self.updater.latest_version})!**\n\nGõ `/update` để tự động nâng cấp."
+            try:
+                await application.bot.send_message(chat_id=self.whitelist_id, text=msg, parse_mode='Markdown')
+            except Exception as e:
+                print(f"Lỗi gửi tin nhắn update: {e}")
+
     def run(self):
         self.app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), self.handle_message))
+        self.app.post_init = self.post_init # Đăng ký callback sau khi khởi tạo
         print("🚀 Davis Iron AI đang sẵn sàng trên Telegram...")
         self.app.run_polling()

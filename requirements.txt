@@ -3,3 +3,5 @@ python-telegram-bot
 pyautogui
 pillow
 python-dotenv
+psutil
+requests

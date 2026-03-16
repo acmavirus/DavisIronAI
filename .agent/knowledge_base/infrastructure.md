@@ -13,6 +13,7 @@
     - `subprocess`: OS command execution
     - `webbrowser`: Browser interactions
 - **Environment Management:** `python-dotenv`
+- **Distribution:** `PyInstaller` (đóng gói EXE)
 
 ## 3. Configuration & Ports
 - **Port Range:** 8900-8999 (Internal services if any)

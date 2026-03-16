@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from .actions import (
     open_app_with_folder, open_directory, take_screenshot, 
     open_link, list_running_apps, kill_application, get_directory_status,
-    save_memory, get_memory, list_memories
+    save_memory, get_memory, list_memories, list_local_projects
 )
 
 load_dotenv()
@@ -21,12 +21,13 @@ class AIEngine:
         self.tools = [
             open_app_with_folder, open_directory, take_screenshot, 
             open_link, list_running_apps, kill_application, get_directory_status,
-            save_memory, get_memory, list_memories
+            save_memory, get_memory, list_memories, list_local_projects
         ]
         
         # Lấy tên chủ nhân từ bộ nhớ, mặc định là 'bạn' nếu không có
         from .memory_manager import memory
         user_name = memory.get_raw("current_user_name", "bạn")
+        favorite_ide = memory.get_raw("favorite_ide", "Antigravity")
 
         self.model = genai.GenerativeModel(
             model_name='gemini-3-flash-preview',
@@ -35,9 +36,12 @@ class AIEngine:
                 f"Bạn là Davis Iron AI, trợ lý đắc lực của {user_name}. "
                 "\nBỘ NHỚ LÂU DÀI: Bạn có khả năng lưu trữ thông tin (save_memory) và truy xuất lại sau (get_memory). "
                 f"Nếu {user_name} nhắc về các dự án hoặc đường dẫn thư mục, hãy dùng get_memory để kiểm tra xem bạn đã lưu chúng chưa. "
-                "Nếu chưa lưu, hãy hỏi họ hoặc tự động lưu lại (save_memory) sau khi họ cung cấp thông tin. "
-                "\nBạn có quyền điều khiển máy tính thông qua các công cụ được cung cấp. "
-                "Hãy phản hồi lịch sự, ngắn gọn và thực thi lệnh ngay khi được yêu cầu."
+                "\nQUY TẮC MỞ DỰ ÁN:"
+                f"\n1. Khi người dùng muốn 'mở dự án [tên]', hãy kiểm tra bộ nhớ với key `project_[tên]_path`."
+                f"\n2. Nếu có, gọi open_app_with_folder với app_name='{favorite_ide}' và folder_path tìm được."
+                "\n3. Nếu chưa có trong bộ nhớ, hãy dùng list_local_projects để xem dự án có nằm trong Laragon không. Nếu có, đề nghị người dùng lưu lại và sau đó mở."
+                "\n4. Nếu không thấy đâu cả, hãy lịch sự hỏi người dùng đường dẫn cụ thể."
+                "\nBạn có quyền điều khiển máy tính thông qua các công cụ được cung cấp. Phản hồi lịch sự, ngắn gọn và thực thi lệnh ngay."
             )
         )
 

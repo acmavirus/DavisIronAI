@@ -163,6 +163,23 @@ def get_directory_status(directory_path: str) -> str:
     except Exception as e:
         return f"❌ Lỗi thống kê: {str(e)}"
 
+def list_local_projects() -> str:
+    """
+    Liệt kê các thư mục dự án trong D:\\laragon\\www để người dùng dễ dàng ánh xạ.
+    """
+    try:
+        base_path = Path("D:/laragon/www")
+        if not base_path.exists():
+            return "❌ Không tìm thấy thư mục Laragon tại D:\\laragon\\www"
+        
+        projects = [d.name for d in base_path.iterdir() if d.is_dir()]
+        if not projects:
+            return "📭 Thư mục Laragon trống."
+        
+        return "📂 Danh sách dự án trong Laragon:\n" + "\n".join([f"- {p}" for p in projects])
+    except Exception as e:
+        return f"❌ Lỗi khi quét dự án: {str(e)}"
+
 def save_memory(key: str, value: str) -> str:
     """
     Lưu trữ một thông tin quan trọng vào bộ nhớ lâu dài.

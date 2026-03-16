@@ -60,9 +60,22 @@ Davis-Iron-AI/
 │   ├── ai_engine.py        # Logic Gemini & Function Calling
 │   └── actions.py          # Thư viện lệnh hệ thống
 ├── .agent/                 # Tri thức & cấu hình Agent (Antigravity)
+│   ├── workflows/          # Quy trình vận hành (Build, Update, Test)
 ├── config/                 # Cài đặt ứng dụng
 ├── .env                    # Biến môi trường (API Keys)
 └── requirements.txt        # Thư viện phụ thuộc
+
+---
+
+## 🛠️ Quy trình Agent (.agent Workflows)
+
+Dự án tích hợp sẵn các quy trình tự động hóa dành cho Agent:
+- `/build_exe`: Hướng dẫn đóng gói ứng dụng thành file `.exe`.
+- `/auto_update`: Quy trình cập nhật mã nguồn và phiên bản mới.
+- `/github_release`: Quy trình tự động tạo GitHub Release và upload EXE.
+- `/tester_case`: Quy trình kiểm thử hệ thống.
+
+---
 ```
 
 ### 3. Cài đặt
