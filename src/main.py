@@ -9,6 +9,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 load_dotenv()
 
 from src.bot_logic import DavisBot
+from src.settings_ui import SettingsApp
 
 VERSION = os.getenv("APP_VERSION", "1.0.0")
 
@@ -26,6 +27,14 @@ def cleanup_temp():
         temp_dir.mkdir(exist_ok=True)
 
 def main():
+    # Kiểm tra cấu hình .env, nếu thiếu thì mở Settings UI
+    if not os.getenv("GEMINI_API_KEY") or not os.getenv("TELEGRAM_BOT_TOKEN"):
+        print("🔍 Thiếu cấu hình, đang mở màn hình cài đặt...")
+        settings = SettingsApp()
+        settings.run()
+        # Load lại env sau khi lưu
+        load_dotenv(override=True)
+
     # Dọn dẹp rác từ lần chạy trước
     cleanup_temp()
     

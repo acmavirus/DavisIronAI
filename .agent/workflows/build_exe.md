@@ -22,11 +22,19 @@ pip install pyinstaller
 Đảm bảo file `.env` đã có các biến cần thiết (mặc dù khi build ta thường không đóng gói `.env` thật).
 
 ### 3. Thực hiện Build
-Sử dụng lệnh sau để tạo file EXE duy nhất, không hiện cửa sổ console (windowed mode):
+Sử dụng lệnh sau để tạo file EXE duy nhất, không hiện cửa sổ console:
 
 // turbo
 ```powershell
-pyinstaller --noconfirm --onefile --windowed --name "DavisIronAI" --add-data "src;src" --hidden-import "telegram.ext" --hidden-import "google.generativeai" src/main.py
+pyinstaller --noconfirm --onefile --windowed --name "DavisIronAI" `
+--hidden-import "telegram.ext" `
+--hidden-import "google.generativeai" `
+--hidden-import "pyautogui" `
+--hidden-import "psutil" `
+--hidden-import "requests" `
+--hidden-import "PIL" `
+--hidden-import "dotenv" `
+src/main.py
 ```
 
 **Giải thích tham số:**
