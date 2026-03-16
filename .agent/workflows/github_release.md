@@ -1,46 +1,38 @@
 ---
-description: Quy trình tự động tạo GitHub Release và upload file EXE
+description: Quy trình tự động tạo GitHub Release qua file Changelog
 ---
 
-# 🚀 Quy trình Phát hành (Release) GitHub
+# 🚀 Quy trình Phát hành (Release) qua Changelog
 
-Workflow này hướng dẫn cách tự động tạo Tag, Release và upload file EXE lên GitHub dựa trên `VERSION` trong code.
-
-## 🛠️ Yêu cầu tiền quyết
-- Đã cài đặt [GitHub CLI (gh)](https://cli.github.com/).
-- Đã đăng nhập bằng lệnh `gh auth login`.
-- Đã thực hiện build EXE thành công (có file trong thư mục `dist/`).
+Dự án hiện được cấu hình để tự động build và tạo release mỗi khi bạn thêm một file nhật ký thay đổi (**Changelog**) mới vào thư mục `changelogs/`.
 
 ## 📝 Các bước thực hiện
 
-# 🚀 Quy trình Phát hành (Release) qua GitHub Actions
+### 1. Tạo file Changelog mới
+Mỗi phiên bản mới phải có một file tương ứng trong thư mục `changelogs/` với định dạng `vX.X.X.md`.
+Ví dụ: `changelogs/v1.0.1.md`
 
-Dự án hiện được cấu hình để tự động build và tạo release thông qua GitHub Actions mỗi khi bạn đẩy một **Tag** mới lên repository.
+Nội dung file nên bao gồm các thay đổi chính của phiên bản này.
 
-## 📝 Các bước thực hiện
-
-### 1. Chuẩn bị mã nguồn
-Đảm bảo bạn đã cập nhật `VERSION` trong `src/main.py` và commit mọi thay đổi.
-
-### 2. Tạo và Đẩy Tag
-Sử dụng PowerShell để tạo tag dựa trên phiên bản và đẩy lên GitHub:
+### 2. Đẩy thay đổi lên GitHub
+Bạn chỉ cần commit file changelog mới và push lên repository:
 
 // turbo
 ```powershell
-$version = (Select-String -Path .env -Pattern "APP_VERSION=(.*)").Matches.Groups[1].Value
-git tag "v$version"
-git push origin "v$version"
+git add changelogs/v1.0.1.md
+git commit -m "Release v1.0.1"
+git push origin main
 ```
 
 ### 3. Tự động hóa (GitHub Actions)
-Ngay sau khi lệnh `git push` hoàn tất:
-1. GitHub Actions sẽ tự động kích hoạt workflow `release.yml`.
-2. Hệ thống sẽ khởi tạo một môi trường Windows ảo.
-3. Tự động Build file `DavisIronAI.exe` bằng PyInstaller.
-4. Tự động tạo bản Release và gắn file EXE vào.
+Ngay sau khi nhận được file changelog mới trong thư mục `changelogs/`:
+1. GitHub Actions sẽ tự động kích hoạt.
+2. Nó sẽ đọc tên file để xác định số phiên bản (`1.0.1`).
+3. Nó sẽ đọc nội dung file để làm mô tả cho bản Release.
+4. Tự động Build file `DavisIronAI.exe` và upload lên GitHub.
 
 ## 🖥️ Theo dõi tiến độ
-Bạn có thể xem tiến trình build tại tab **Actions** trên Repository GitHub của mình.
+Bạn có thể xem tiến trình build và release tại tab **Actions** trên Repository GitHub của mình.
 
 ---
 **Managed by Davis Iron Agent**
