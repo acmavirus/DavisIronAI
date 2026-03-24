@@ -27,6 +27,9 @@ Sử dụng lệnh sau để tạo file EXE duy nhất, không hiện cửa sổ
 // turbo
 ```powershell
 pyinstaller --noconfirm --onefile --windowed --name "DavisIronAI" `
+--add-data "src;src" `
+--add-data "assets;assets" `
+--hidden-import "telegram" `
 --hidden-import "telegram.ext" `
 --hidden-import "google.generativeai" `
 --hidden-import "pyautogui" `
